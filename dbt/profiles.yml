@@ -1,0 +1,23 @@
+airflow_dbt_warehouse:
+  target: "{{ env_var('DBT_TARGET', 'dev') }}"
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'postgres') }}"
+      user: "{{ env_var('POSTGRES_USER', 'warehouse') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'warehouse') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'warehouse') }}"
+      schema: analytics
+      threads: 4
+      keepalives_idle: 0
+    ci:
+      type: postgres
+      host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+      user: "{{ env_var('POSTGRES_USER', 'warehouse') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD', 'warehouse') }}"
+      port: "{{ env_var('POSTGRES_PORT', '5432') | int }}"
+      dbname: "{{ env_var('POSTGRES_DB', 'warehouse') }}"
+      schema: analytics_ci
+      threads: 4
+      keepalives_idle: 0

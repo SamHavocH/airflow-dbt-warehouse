@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: Customer dimension enriched with geographic region.
+    columns:
+      - name: customer_id
+        description: Customer primary key.
+        tests: [not_null, unique]
+      - name: region
+        description: Reporting region derived from the country seed.
+        tests: [not_null]
+
+  - name: dim_products
+    description: Product dimension for order analysis.
+    columns:
+      - name: product_id
+        description: Product primary key.
+        tests: [not_null, unique]
+      - name: category
+        tests: [not_null]
+
+  - name: dim_dates
+    description: Calendar date spine used for daily reporting and missing-date analysis.
+    columns:
+      - name: date_day
+        description: Calendar day.
+        tests: [not_null, unique]
+
+  - name: fct_orders
+    description: Incremental order fact table with revenue and status flags.
+    columns:
+      - name: order_id
+        description: Order primary key.
+        tests: [not_null, unique]
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: product_id
+        tests:
+          - relationships:
+              to: ref('dim_products')
+              field: product_id
+      - name: gross_revenue
+        tests:
+          - not_null
+          - non_negative
+      - name: status
+        tests:
+          - accepted_values:
+              values: ["completed", "refunded", "cancelled"]
+
+  - name: fct_web_events
+    description: Web event fact table with session event sequencing.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: customer_id
+        tests:
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id

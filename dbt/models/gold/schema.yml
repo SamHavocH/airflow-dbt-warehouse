@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: customer_revenue_mart
+    description: Customer-level revenue mart for segmentation and lifecycle analysis.
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+      - name: lifetime_revenue
+        tests:
+          - not_null
+          - non_negative
+      - name: customer_segment
+        tests:
+          - accepted_values:
+              values: ["high_value", "growth", "new_or_low_activity"]
+
+  - name: daily_revenue_mart
+    description: Daily revenue mart with completed, refunded, gross revenue, and seven-day moving average metrics.
+    columns:
+      - name: date_day
+        tests: [not_null, unique]
+      - name: gross_revenue
+        tests:
+          - not_null
+          - non_negative
+
+  - name: marketing_funnel_mart
+    description: Marketing source funnel metrics from sessionized web event activity.
+    columns:
+      - name: utm_source
+        tests: [not_null, unique]
+
+exposures:
+  - name: executive_revenue_dashboard
+    label: Executive Revenue Dashboard
+    type: dashboard
+    maturity: medium
+    url: https://example.com/dashboard-placeholder
+    description: Portfolio placeholder dashboard powered by customer and daily revenue marts.
+    depends_on:
+      - ref('customer_revenue_mart')
+      - ref('daily_revenue_mart')
+    owner:
+      name: Analytics Engineering
+      email: analytics@example.com

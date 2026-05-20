@@ -1,0 +1,14 @@
+CREATE SCHEMA IF NOT EXISTS raw;
+CREATE SCHEMA IF NOT EXISTS bronze;
+CREATE SCHEMA IF NOT EXISTS silver;
+CREATE SCHEMA IF NOT EXISTS gold;
+
+CREATE TABLE IF NOT EXISTS raw.pipeline_runs (
+    run_id TEXT PRIMARY KEY,
+    dag_id TEXT NOT NULL,
+    data_interval_start TIMESTAMPTZ NOT NULL,
+    data_interval_end TIMESTAMPTZ NOT NULL,
+    status TEXT NOT NULL,
+    rows_loaded INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

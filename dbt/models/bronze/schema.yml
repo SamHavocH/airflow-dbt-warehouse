@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: bronze_customers
+    description: Latest customer record per customer after basic trimming and normalization.
+    columns:
+      - name: customer_id
+        description: Stable customer business key.
+        tests: [not_null, unique]
+      - name: email
+        description: Normalized customer email address.
+        tests: [not_null]
+      - name: country_code
+        description: ISO-like country code used for regional reporting.
+        tests:
+          - accepted_values:
+              values: ["BR", "AR", "US"]
+
+  - name: bronze_products
+    description: Product catalog data as received from the source system.
+    columns:
+      - name: product_id
+        tests: [not_null, unique]
+      - name: unit_price
+        tests:
+          - not_null
+          - non_negative
+
+  - name: bronze_orders
+    description: Latest version of each order after deduplicating source updates.
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: status
+        tests:
+          - accepted_values:
+              values: ["completed", "refunded", "cancelled"]
+      - name: customer_id
+        tests: [not_null]
+      - name: product_id
+        tests: [not_null]
+
+  - name: bronze_events
+    description: Raw web events with consistent casing and event dates.
+    columns:
+      - name: event_id
+        tests: [not_null, unique]
+      - name: event_name
+        tests:
+          - accepted_values:
+              values: ["page_view", "product_view", "add_to_cart", "checkout_started", "purchase"]

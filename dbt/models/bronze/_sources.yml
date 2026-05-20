@@ -1,0 +1,24 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Source tables loaded by the Airflow ingestion task into PostgreSQL.
+    schema: raw
+    tables:
+      - name: raw_customers
+        description: Customer snapshots from the commerce application.
+        loaded_at_field: ingested_at
+        columns:
+          - name: customer_id
+            tests: [not_null]
+          - name: updated_at
+            tests: [not_null]
+      - name: raw_products
+        description: Product catalog snapshots.
+        loaded_at_field: ingested_at
+      - name: raw_orders
+        description: Order events and later status updates.
+        loaded_at_field: ingested_at
+      - name: raw_events
+        description: Web analytics events captured by the product.
+        loaded_at_field: loaded_at

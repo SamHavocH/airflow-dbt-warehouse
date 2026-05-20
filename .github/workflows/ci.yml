@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: warehouse
+          POSTGRES_PASSWORD: warehouse
+          POSTGRES_DB: warehouse
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U warehouse -d warehouse"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: warehouse
+      POSTGRES_PASSWORD: warehouse
+      DBT_PROFILES_DIR: dbt
+      DBT_TARGET: ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint and unit tests
+        run: |
+          ruff check .
+          ruff format --check .
+          pytest
+
+      - name: Initialize schemas
+        run: psql "$DATABASE_URL" -f sql/init.sql
+        env:
+          DATABASE_URL: postgresql://warehouse:warehouse@localhost:5432/warehouse
+
+      - name: Load raw sample data
+        run: >
+          python scripts/ingest_raw_data.py
+          --run-id github-actions
+          --data-interval-start 2026-05-19T00:00:00+00:00
+          --data-interval-end 2026-05-20T00:00:00+00:00
+
+      - name: Validate dbt project
+        working-directory: dbt
+        run: |
+          dbt deps
+          dbt build --target ci
+          dbt docs generate --target ci
