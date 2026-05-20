@@ -9,6 +9,9 @@ dependencies = [
   "python-dotenv>=1.0.1",
 ]
 
+[tool.setuptools]
+packages = ["scripts"]
+
 [project.optional-dependencies]
 dev = [
   "pytest>=8.3.4",

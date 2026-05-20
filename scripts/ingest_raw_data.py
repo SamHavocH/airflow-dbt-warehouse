@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import argparse
 import logging
+from collections.abc import Iterable
 from datetime import datetime
-from typing import Iterable
 
 import psycopg2
 from psycopg2.extras import execute_values
